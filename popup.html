@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drive 影片下載器</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <header><h1>Drive 影片下載器</h1></header>
+  <main>
+    <p id="status" role="status">正在讀取目前分頁…</p>
+    <section aria-labelledby="video-heading" hidden>
+      <h2 id="video-heading">影片</h2>
+      <ul id="video"></ul>
+    </section>
+    <section aria-labelledby="audio-heading" hidden>
+      <h2 id="audio-heading">音軌</h2>
+      <ul id="audio"></ul>
+    </section>
+  </main>
+</body>
+</html>

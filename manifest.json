@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Drive 影片下載器",
-  "version": "1.3.0",
+  "version": "1.9.4",
   "description": "偵測 Google Drive 播放器的影片與音軌，讓你分別下載。",
   "minimum_chrome_version": "119",
   "permissions": [
     "webRequest",
     "webNavigation",
     "storage",
+    "scripting",
     "downloads",
     "activeTab"
   ],

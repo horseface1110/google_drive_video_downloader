@@ -1,3 +1,5 @@
+import { downloadInPlayer } from './player-download.js';
+
 const requestFilter = {
   urls: [
     'https://drive.google.com/*videoplayback*',
@@ -7,12 +9,6 @@ const requestFilter = {
     'https://drive.usercontent.google.com/*videoplayback*',
     'https://docs.google.com/*videoplayback*',
   ],
-};
-const extensions = {
-  'audio/mp4': 'm4a', 'audio/webm': 'webm', 'audio/mpeg': 'mp3',
-  'audio/aac': 'aac', 'audio/ogg': 'ogg', 'audio/opus': 'opus',
-  'video/mp4': 'mp4', 'video/webm': 'webm', 'video/ogg': 'ogv',
-  'video/x-flv': 'flv', 'video/3gpp': '3gp',
 };
 const pending = new Map();
 const storage = chrome.storage.session;
@@ -129,7 +125,7 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
   }
 
   if (sender.url !== chrome.runtime.getURL('popup.html') ||
-      !['list', 'download'].includes(message?.action) ||
+      !['list', 'downloadInPlayer'].includes(message?.action) ||
       !Number.isInteger(message.tabId)) return;
 
   const { tabId } = message;
@@ -146,16 +142,9 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
 
     const track = tracks.find(item => item.id === message.id);
     if (!track) return { error: '這個項目已失效，請重新播放影片。' };
-    const label = track.kind === 'audio' ? '音軌' : '影片';
-    const extension = extensions[track.mime] ?? track.mime.split('/')[1].replace(/[^a-z0-9]/g, '');
-    const downloadId = await chrome.downloads.download({
-      url: track.url,
-      filename: `Drive-${label}${track.itag ? '-' + track.itag : ''}.${extension || 'bin'}`,
-      saveAs: true,
-    });
-    return { downloadId };
+    return downloadInPlayer(tabId, track.url);
   }).then(reply, () => reply({
-    error: message.action === 'list' ? '讀取清單失敗。' : '無法開始下載，請重新播放影片後再試。',
+    error: message.action === 'list' ? '讀取清單失敗。' : '無法處理媒體，請重新播放影片後再試。',
   }));
   return true;
 });

@@ -1,7 +1,7 @@
 const status = document.querySelector('#status');
 let tabId;
 let refreshVersion = 0;
-let downloadNotice = '';
+let playbackNotice = '';
 const starting = new Set();
 const rows = new Map();
 
@@ -13,18 +13,21 @@ function trackLabel(track) {
   return [format, track.itag && `格式 ${track.itag}`, size].filter(Boolean).join(' · ');
 }
 
-async function download(track, button) {
+async function downloadTrack(track, button) {
   starting.add(track.id);
   button.disabled = true;
+  playbackNotice = '正在準備下載，開始後會切換到播放器…';
+  status.textContent = playbackNotice;
   try {
-    const result = await chrome.runtime.sendMessage({ action: 'download', tabId, id: track.id });
-    downloadNotice = result.error ?? '已交給 Chrome 下載，可在下載記錄查看進度。';
+    const result = await chrome.runtime.sendMessage({ action: 'downloadInPlayer', tabId, id: track.id });
+    if (!result) throw new Error('Missing download reply');
+    playbackNotice = result.error ?? result.notice ?? '已開始下載，可在 Chrome 下載記錄查看。';
   } catch {
-    downloadNotice = '無法開始下載，請重新播放影片後再試。';
+    playbackNotice = '未收到下載回覆，請查看 Chrome 下載記錄。';
   } finally {
     starting.delete(track.id);
     button.disabled = false;
-    status.textContent = downloadNotice;
+    status.textContent = playbackNotice;
   }
 }
 
@@ -45,7 +48,7 @@ function renderTracks(tracks) {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = '下載';
-      button.addEventListener('click', () => download(track, button));
+      button.addEventListener('click', () => downloadTrack(track, button));
       row.append(info, button);
       rows.set(track.id, row);
     }
@@ -72,7 +75,7 @@ async function refresh() {
     renderTracks(result.tracks);
     let emptyMessage = '尚未收到播放請求。請重新整理 Drive 頁面，按播放後再開啟擴充功能。';
     if (result.detected) emptyMessage = '已收到播放請求，但目前無法判斷它是影片還是音軌。';
-    status.textContent = result.tracks.length ? downloadNotice : emptyMessage;
+    status.textContent = result.tracks.length ? playbackNotice : emptyMessage;
   } catch {
     if (version === refreshVersion) status.textContent = '讀取清單失敗，請重新開啟擴充功能。';
   }

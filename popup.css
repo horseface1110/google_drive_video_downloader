@@ -2,6 +2,7 @@
 body { width: 340px; margin: 0; color: #172b25; background: #f4f8f6; }
 header { padding: 15px 18px; background: #123a30; color: #fff; }
 h1 { margin: 0; font-size: 17px; }
+header p { margin-top: 4px; }
 main { padding: 14px 18px 18px; }
 p { margin: 0; }
 p:empty { display: none; }
